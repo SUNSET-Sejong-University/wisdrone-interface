@@ -1,0 +1,14 @@
+:root {
+  --primary-color: #00f2ff;
+  --secondary-color: #7000ff;
+  --bg-color: #0b0e14;
+  --panel-bg: rgba(16, 20, 28, 0.85);
+  --text-main: #ffffff;
+  --text-dim: #8ba1b5;
+  --success: #00ff9d;
+  --warning: #ffb800;
+  --danger: #ff0055;
+  
+  --glass-border: 1px solid rgba(255, 255, 255, 0.1);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}

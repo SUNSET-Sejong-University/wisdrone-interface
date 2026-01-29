@@ -1,36 +1,61 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
-
-import DroneViewer from './components/VideoPlayer/DroneViewer';
-import DroneController from './components/Dashboard/DroneController';
+import { DeviceProvider, useDevices } from './contexts/DeviceContext';
+import { MapContainer } from './components/map/MapContainer';
+import { DeviceEditor } from './components/editor/DeviceEditor';
+import { VideoStream } from './components/overlay/VideoStream';
+import { DataPanel } from './components/overlay/DataPanel';
+import './App.css';
 
 function App() {
+  // Get stream URL from env
+  const gatewayUrl = import.meta.env.VITE_GATEWAY_WS_URL || '';
+  
+  // We need access to device context, but App is outside Provider in previous code
+  // We need to move the logic inside a child component or move Provider up
+  // Let's create an AppContent component to handle this cleanly
+  
   return (
-    <div style={{ padding: '20px', backgroundColor: '#1a1a1a', minHeight: '100vh', color: 'white' }}>
-      <h1>🚁 AIoT Drone GCS (Interface Prototype)</h1>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-        
-        {/* 왼쪽: 영상 패널 */}
-        <div>
-           <DroneViewer/>
-        </div>
-
-        {/* 오른쪽: 지도 및 컨트롤러 영역 */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-        
-        {/* 컨트롤러 패널 */}
-        <DroneController />
-        
-        <div style={{ border: '2px dashed gray', flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <h3>3D Map Area</h3>
-        </div>
-      </div>
-
-      </div>
-    </div>
+    <DeviceProvider>
+      <AppContent gatewayUrl={gatewayUrl} />
+    </DeviceProvider>
   );
 }
 
-export default App
+const AppContent = ({ gatewayUrl }: { gatewayUrl: string }) => {
+  const { selectedDevice, devices } = useDevices();
+  
+  // Determine active stream URL
+  // If a device is selected and has a streamUrl, use it
+  // Otherwise default to gateway stream or none
+  const activeDevice = devices.find(d => d.deviceId === selectedDevice);
+  const activeStreamUrl = activeDevice?.streamUrl || gatewayUrl;
+  const activeStreamName = activeDevice ? `${activeDevice.type} ${activeDevice.deviceId}` : 'Gateway Stream';
+
+  return (
+    <div className="app-layout">
+      <header className="app-header glass-panel">
+        <h1>WisDrone AIoT Interface</h1>
+        <div className="status-badges">
+          <span className="badge badge-active">System Online</span>
+        </div>
+      </header>
+      
+      <main className="main-content">
+        <MapContainer />
+        
+        {/* Data Panel (Mobius) */}
+        <DataPanel />
+        
+        {/* Device Editor Panel */}
+        <DeviceEditor />
+        
+        {/* Video Stream */}
+        <VideoStream 
+          streamUrl={activeStreamUrl} 
+          deviceName={activeStreamName} 
+        />
+      </main>
+    </div>
+  );
+};
+
+export default App;
