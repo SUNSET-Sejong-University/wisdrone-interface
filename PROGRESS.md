@@ -102,6 +102,64 @@
 
 ---
 
+## ⚠️ 통신 관련 주의사항
+
+### Mobius4 연동 시 필수 확인 사항
+
+> [!WARNING]
+> **`.env` 파일 설정이 Mobius4 서버 설정과 정확히 일치해야 합니다!**
+
+#### 1. CSE 이름 (CSEBase Resource Name) 매칭
+- **Mobius4 설정**: `config/default.json`의 `cse.csebase_rn` 값 확인
+- **프론트엔드 설정**: `.env`의 `VITE_MOBIUS_CSE_NAME` 값과 **반드시 일치**
+- **기본값**: `Mobius` (대소문자 구분!)
+
+```json
+// Mobius4 config/default.json
+{
+  "cse": {
+    "cse_id": "/Mobius4",
+    "csebase_rn": "Mobius"  // ← 이 값과 일치해야 함
+  }
+}
+```
+
+```bash
+# .env 파일
+VITE_MOBIUS_CSE_NAME=Mobius  # ← 위 값과 동일해야 함
+```
+
+#### 2. 포트 번호 확인
+- **Mobius4 기본 포트**: `7599` (HTTP)
+- **HTTPS 포트**: `7580`
+- `.env`의 `VITE_MOBIUS_HOST`에 올바른 포트 지정 필수
+
+#### 3. API 경로 구조
+- **올바른 경로 형식**: `http://localhost:7599/Mobius/{AE_NAME}/{CONTAINER_NAME}`
+- **잘못된 예시**: 
+  - ❌ `/mobius` (소문자)
+  - ❌ `/Mobius4` (CSE ID와 혼동)
+  - ❌ 포트 누락
+
+#### 4. oneM2M 헤더 필수 값
+- `X-M2M-Origin`: AE 이름과 일치 (예: `WisDrone`)
+- `X-M2M-RVI`: `4` (Mobius4 버전)
+- `Content-Type`: `application/json;ty=3` (Container 생성 시)
+
+#### 5. 자주 발생하는 오류
+| 증상 | 원인 | 해결 방법 |
+|-----|------|----------|
+| `404 Not Found` | CSE 이름 불일치 | `.env`와 `config/default.json` 비교 |
+| `CORS Error` | Mobius4 서버 미실행 | `node mobius4.js` 실행 확인 |
+| `Connection Refused` | 포트 번호 오류 | 7599 포트 사용 확인 |
+| `4103 (Originator has no privileges)` | Origin 헤더 오류 | AE 이름 확인 |
+
+> [!IMPORTANT]
+> **참고 자료**: [Mobius4 공식 레포지토리](https://github.com/IoTKETI/mobius4)  
+> 설정 파일 예시: `config/default.json`
+
+---
+
 ## 🎯 다음 단계 추천
 
 1. **GPS 실데이터 연동** (즉시 적용 가능)

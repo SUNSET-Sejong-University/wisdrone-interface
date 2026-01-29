@@ -32,18 +32,22 @@ export const useMobius = (
         setIsInitialized(success);
         if (!success) {
           setError(new Error('Mobius 초기화 실패'));
+          initializingRef.current = false;  // 재시도 가능하게
         }
       } catch (err) {
         setError(err as Error);
+        initializingRef.current = false;  // 재시도 가능하게
       }
     };
     
     init();
   }, [autoInitialize]);
 
+
+
   // Fetch data function
   const fetchData = useCallback(async () => {
-    if (!containerName || !getAEI()) return;
+    if (!containerName ||!isInitialized|| !getAEI()) return;
     
     setLoading(true);
     try {
@@ -55,7 +59,7 @@ export const useMobius = (
     } finally {
       setLoading(false);
     }
-  }, [containerName]);
+  }, [containerName,isInitialized]);
 
   // Polling effect
   useEffect(() => {
